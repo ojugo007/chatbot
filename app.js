@@ -12,7 +12,9 @@ const io = new Server(server)
 app.use(express.static("public"))
 
 io.on("connection", (socket)=>{
-    console.log( "a user connected " + socket.id)
+    const userId = socket.handshake.auth.userId;
+
+    console.log( "a user connected " + userId + " " + socket.id)
     console.log(socket.listenerCount)
     // socket.on("greeting", (data)=>{
     //     console.log(data)

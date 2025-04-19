@@ -1,47 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/css/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/css/style.css" />
     <title>Document</title>
-</head>
-<body>
+  </head>
+  <body>
     <main class="container">
-        <div class="chat-box">
+      <div class="chat-box">
+        <section class="chat-section">
+          <div class="welcome-message-container">
+            <img
+              src="/images/bot.png"
+              alt="bot image"
+              width="30px"
+              height="30px"
+            />
 
-            <div class="welcome-message-container">
-                
-                <img src="/images/bot.png" alt="bot image" width="30px" height="30px">
-                
-                <p id="bot-welcome-message"> </p>
-            </div>
-            
-            <div class="option-container">
-                <b>how i fit take assist you today?</b>
-                <div id="option-grid">
+            <p id="bot-welcome-message"></p>
+          </div>
 
-            </div>
-        </div>
-        <div id="message-box">
+          <div class="option-container">
+            <b>how i fit take assist you today?</b>
+            <div id="option-grid"></div>
+          </div>
+          <div id="message-box">
             <!-- <div class="selected-options">
                 <p class="user-message"> hello how can i help you today?</p>
                 
                 <img src="/images/user.png" alt="user image" width="30px" height="30px">
                 
             </div> -->
-            
-        </div>
-        
-        <form action="" id="send-message">
-            <input type="text" name="list" id="list"  />
-            <button type="submit"><img src="/images/send.png" alt="send mail icon" width="24px" id="btn"></button>
-        </form>
-    </div>
+          </div>
+        </section>
+        <section class="form-section">
+          <form action="" id="send-message">
+            <input type="text" name="list" id="list" autofocus />
+            <button type="submit">
+              <img
+                src="/images/send.png"
+                alt="send mail icon"
+                width="24px"
+                id="btn"
+              />
+            </button>
+          </form>
+        </section>
+      </div>
     </main>
-</body>
-    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js" integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+" crossorigin="anonymous"></script>
-    
-    <script src="/js/main.js"></script>
+  </body>
+  <script
+    src="https://cdn.socket.io/4.8.1/socket.io.min.js"
+    integrity="sha384-mkQ3/7FUtcGyoppY6bz/PORYoGqOl7/aSUMn2ymDOJcapfS6PHqxhRTMh1RR0Q6+"
+    crossorigin="anonymous"
+  ></script>
 
+  <script src="/js/main.js"></script>
 </html>

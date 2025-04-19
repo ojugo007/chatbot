@@ -9,10 +9,18 @@ const message_box = document.querySelector("#message-box");
 
 
 
-const socket = io("http://localhost:8080")
+// const socket = io("http://localhost:8080")
+
+let userId = localStorage.getItem("userId")
+if(!userId){
+    userId = crypto.randomUUID();
+    localStorage.setItem("userId", userId)
+}
+const socket = io("http://localhost:8080", {auth : { userId}})
 
 socket.on("greeting", (data)=>{
     console.log(data)
+
     setTimeout(()=>{
         greeting.innerHTML = data
     }, 1000);
@@ -61,6 +69,8 @@ send_message.addEventListener("submit", (e)=>{
 } )
 
 socket.on("request", (message)=>{
+    const chat_section = document.querySelector(".chat-section")
+
     const bot_reponse_container = document.createElement('div');
     bot_reponse_container.classList.add("welcome-message-container");
     const bot_message_el = document.createElement('p');
@@ -70,9 +80,16 @@ socket.on("request", (message)=>{
     bot_image.height = 30;
     bot_image.alt = "bot image";
     bot_image.src="/images/bot.png";
+    if(message){
+        console.log("this condition works: ", message)
 
-    bot_message_el.appendChild(document.createTextNode(message))
-    bot_reponse_container.appendChild(bot_image)
-    bot_reponse_container.appendChild(bot_message_el)
-    message_box.appendChild(bot_reponse_container)
+        bot_message_el.appendChild(document.createTextNode(message))
+        bot_reponse_container.appendChild(bot_image)
+        bot_reponse_container.appendChild(bot_message_el)
+        message_box.appendChild(bot_reponse_container)
+        chat_section.scrollTo({
+            top: chat_section.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
 })
