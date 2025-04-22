@@ -51,6 +51,7 @@ send_message.addEventListener("submit", (e)=>{
     e.preventDefault();
     const message = list.value
     socket.emit("selected", message)
+    socket.emit("menu-selected", message)
     const user_container = document.createElement('div');
     user_container.classList.add("selected-options");
     const user_message_el = document.createElement('p');
@@ -81,9 +82,19 @@ socket.on("request", (message)=>{
     bot_image.alt = "bot image";
     bot_image.src="/images/bot.png";
     if(message){
-        console.log("this condition works: ", message)
+        // console.log("this condition works: ", message)
+        if(typeof(message)=="string"){
+            bot_message_el.appendChild(document.createTextNode(message))
+        }else if(Array.isArray(message)){
+            
+            console.log("its an array")
+            const formattedMenu = message.map((msg)=>{
+                return `${msg.number}.  ${msg.name} ------> #${msg.price} ....`
+            }).join("\n")
 
-        bot_message_el.appendChild(document.createTextNode(message))
+            console.log(formattedMenu)
+            bot_message_el.appendChild(document.createTextNode(formattedMenu))
+        }
         bot_reponse_container.appendChild(bot_image)
         bot_reponse_container.appendChild(bot_message_el)
         message_box.appendChild(bot_reponse_container)
@@ -92,4 +103,5 @@ socket.on("request", (message)=>{
             behavior: 'smooth'
         });
     }
+
 })
