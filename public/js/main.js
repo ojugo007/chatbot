@@ -9,27 +9,35 @@ const message_box = document.querySelector("#message-box");
 
 
 
-// const socket = io("http://localhost:8080")
-
 let userId = localStorage.getItem("userId")
-if(!userId){
+if (!userId) {
     userId = crypto.randomUUID();
     localStorage.setItem("userId", userId)
 }
-const socket = io("http://localhost:8080", {auth : { userId}})
+// const socket = io("http://localhost:8080", { auth: { userId } })
+const socket = io(`${location.origin}`, {
+    auth: { userId },
+    transports: ['websocket'],
+});
 
-socket.on("greeting", (data)=>{
-    console.log(data)
-
-    setTimeout(()=>{
-        greeting.innerHTML = data
-    }, 1000);
+socket.on("connect", ()=>{
+    console.log("connect was made before greeting")
 })
 
-socket.on("menus", (options)=>{
+socket.on("greeting", (data) => {
+    console.log(data)
+
+    setTimeout(() => {
+        greeting.innerHTML = data
+    }, 1000);
+
+
+})
+
+socket.on("menus", (options) => {
     option_container.classList.add("hidden")
-    function getList(){
-        for(option of options){
+    function getList() {
+        for (option of options) {
             option_container.classList.remove("hidden")
             const list = document.createElement('span')
             const listText = document.createTextNode(option)
@@ -39,15 +47,15 @@ socket.on("menus", (options)=>{
 
     }
 
-    setTimeout(()=>{
+    setTimeout(() => {
         getList()
     }, 2000);
+
+    
 })
 
 
-
-
-send_message.addEventListener("submit", (e)=>{
+send_message.addEventListener("submit", (e) => {
     e.preventDefault();
     const message = list.value
     socket.emit("selected", message)
@@ -60,16 +68,16 @@ send_message.addEventListener("submit", (e)=>{
     user_profile_image.width = 30;
     user_profile_image.height = 30;
     user_profile_image.alt = "user profile image";
-    user_profile_image.src="/images/user.png";
+    user_profile_image.src = "/images/user.png";
     const user_text = document.createTextNode(message)
     user_message_el.appendChild(user_text)
     user_container.appendChild(user_message_el)
     user_container.appendChild(user_profile_image)
     message_box.appendChild(user_container)
     list.value = ""
-} )
+})
 
-socket.on("request", (message)=>{
+socket.on("request", (message) => {
     const chat_section = document.querySelector(".chat-section")
 
     const bot_reponse_container = document.createElement('div');
@@ -80,15 +88,15 @@ socket.on("request", (message)=>{
     bot_image.width = 30;
     bot_image.height = 30;
     bot_image.alt = "bot image";
-    bot_image.src="/images/bot.png";
-    if(message){
+    bot_image.src = "/images/bot.png";
+    if (message) {
         // console.log("this condition works: ", message)
-        if(typeof(message)=="string"){
+        if (typeof (message) == "string") {
             bot_message_el.appendChild(document.createTextNode(message))
-        }else if(Array.isArray(message)){
-            
+        } else if (Array.isArray(message)) {
+
             console.log("its an array")
-            const formattedMenu = message.map((msg)=>{
+            const formattedMenu = message.map((msg) => {
                 return `${msg.number}.  ${msg.name} ------> #${msg.price} ....`
             }).join("\n")
 
@@ -105,3 +113,11 @@ socket.on("request", (message)=>{
     }
 
 })
+
+socket.on("connect_error", (err) => {
+    console.error("Socket connection error:", err.message);
+});
+
+socket.on("disconnect", (reason) => {
+    console.warn("Socket disconnected:", reason);
+});
