@@ -1,5 +1,7 @@
 const menus = require("./menu")
 const cache = require("./redisClient")
+const axios = require("axios")
+require("dotenv").config()
 
 function showMenu(socket) {
     socket.emit("request", menus)
@@ -20,7 +22,7 @@ const selectOrder = async (selection, socket, key) => {
     }
 
     orders.push(selectedItem);
-    // console.log(orders)
+
     const orderTotal = orders.map((order)=> order.price).reduce((cum, curr)=> cum + curr)
     const orderList = orders.map((order)=> order.name).reduce((cum, curr)=> cum + ", " + curr) 
 
@@ -30,7 +32,6 @@ const selectOrder = async (selection, socket, key) => {
                     <b>enter 99 to checkout</b>`
 
     socket.emit("request", message)
-    // socket.emit("request", `your orders: ${orderList}... <br> Total: #${orderTotal} <br> enter 99 to checkout`)
 
     await cache.redis.set(key, JSON.stringify(orders), { EX: 24 * 60 * 60 * 7 })
 
@@ -39,19 +40,17 @@ const selectOrder = async (selection, socket, key) => {
 const checkDbForOrder = async (key) => {
     const order = await cache.redis.get(key)
     if (order) {
-        console.log("order: ", order)
         return order
     } else {
-        console.log("no order found")
         return null
     }
 }
 
 const getOrderHistory = async(key) =>{
-    console.log(key.split(":")[2])
     const userKey = key.split(":")[2]
     const keys  = await cache.redis.keys("*")
     const userKeys = keys.filter((ky)=> ky.split(":")[2] === userKey)
+
     if(userKeys.length === 0){
         return `no order history was found`
     }
@@ -70,9 +69,36 @@ const cancelOrder = async(key)=>{
     return "your current order has been cancelled";
 }
 
+const checkout = async(key) =>{
+    const order = await cache.redis.get(key)
+    const amount = JSON.parse(order).map((item)=>item.price).reduce((cum, curr)=> cum + curr)
+
+    const data = {
+        "email" : "ojugos@gmail.com",
+        "amount" : amount * 100
+    }
+   const response = await axios.post("https://api.paystack.co/transaction/initialize", data, {
+        headers:{
+            'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+            'Content-Type': 'application/json'
+        }
+    })
+ 
+    const message = `<p>Your money na <b>&#8358;${amount}</b>, click the button to checkout</p>
+                    <a href="${response.data.data.authorization_url}" target="_blank" rel="noopener noreferrer" class="btn">Checkout Now</a>
+    `
+    return message
+
+}
 
 
 
 
-
-module.exports = { showMenu, checkDbForOrder, selectOrder, getOrderHistory, cancelOrder }
+module.exports = { 
+    showMenu, 
+    checkDbForOrder, 
+    selectOrder, 
+    getOrderHistory, 
+    checkout, 
+    cancelOrder 
+}

@@ -176,3 +176,14 @@ form {
 ::-webkit-scrollbar-thumb:hover {
   background: #9e9d9d;
 }
+
+.btn{
+    color:white;
+    background-color: rgb(0, 95, 0);
+    padding: 8px;
+    border-radius: 5px;
+    text-decoration: none;
+    display: block;
+    margin-top: 25px;
+    text-align: center;
+}

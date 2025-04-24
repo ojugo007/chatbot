@@ -5,7 +5,8 @@ const join = require("path").join
 require("dotenv").config()
 const cache = require("./redisClient")
 const menus = require("./menu")
-const {showMenu, checkDbForOrder, selectOrder, getOrderHistory, cancelOrder } = require("./orderLogic")
+const {showMenu, checkDbForOrder, selectOrder, getOrderHistory, checkout, cancelOrder } = require("./orderLogic")
+
 
 const PORT = process.env.PORT || 8080
 
@@ -17,9 +18,6 @@ app.use(express.static("public"))
 
 io.on("connection", (socket)=>{
     const userId = socket.handshake.auth.userId;
-
-    console.log( "a user connected " + userId + " " + socket.id)
-    console.log(socket.listenerCount)
  
     socket.emit("greeting", "Welcome to Iya-Bashira Buka! My name na Padi, your assistant bot.")
 
@@ -35,22 +33,19 @@ io.on("connection", (socket)=>{
     let userState = {};
 
     socket.on("selected", (message)=>{
-        console.log(message)
         const currentState = userState[socket.id] || "main-menu"
-        console.log("current state: ", currentState)
         const userId = socket.handshake.auth.userId;
         const key = `user:${socket.id}:${userId}`
 
         switch(currentState){
             
             case "main-menu":
-                console.log("user state: ", userState)
 
                 switch(message){
 
                     case '1':
                         userState[socket.id] = "ordering"
-                        console.log(userState)
+                       
                         showMenu(socket)
 
                         socket.on("menu-selected", (selection)=>{
@@ -59,18 +54,24 @@ io.on("connection", (socket)=>{
                         })
                         break;
                     case '99':
-                        // socket.emit( "request" ,`you selected ${message} to checkout order`)
-                        // redirect to checkout page
+                        
                         checkDbForOrder(key).then((order)=>{
                             console.log(order, typeof(order))
                             if(order){
-                                // socket.emit("request", `you have an order with id ${order}`)
-                                socket.emit("request", `checkout`)
+                                checkout(key).then((res)=>{
+
+                                    socket.emit("request", res)
+                                    
+                                }).catch((err)=>{
+
+                                    console.log(err.message)
+
+                                }).finally(()=>console.log("werey must run"))
                             }else{
                                 socket.emit("request", "you have no order yet")
                             }
                         }).catch((err)=>{
-                            console.log(err)
+                        
                             socket.emit("request", "an error occurred while checking your order")
                         })
 
@@ -101,14 +102,12 @@ io.on("connection", (socket)=>{
                     case '97':
                         checkDbForOrder(key).then((order)=>{
                             if(order){
-                                console.log(order, typeof(order))
                                 socket.emit("request", JSON.parse(order))
                                 userState[socket.id] = "main-menu"
                             }else{
                                 socket.emit("request", "you have no order yet")
                             }
                         }).catch((err)=>{
-                            console.log(err)
                             socket.emit("request", `an error occurred while checking your order ${err.message}` )
                         })
                         break;
@@ -145,10 +144,18 @@ io.on("connection", (socket)=>{
 
                     case "99":
                         checkDbForOrder(key).then((order)=>{
+
                             if(order){
-                                // socket.emit("request", `you have an order with id ${order}`)
-                                socket.emit("request", `checkout`)
-                                
+                                checkout(key).then((res)=>{
+
+                                    socket.emit("request", res)
+
+                                }).catch((err)=>{
+
+                                    console.log(err.message)
+
+                                }).finally(()=>console.log("werey must run"))
+                               
                                 userState[socket.id] = "main-menu"
                             }else{
                                 socket.emit("request", "you have no order yet")
