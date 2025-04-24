@@ -5,7 +5,7 @@ const join = require("path").join
 require("dotenv").config()
 const cache = require("./redisClient")
 const menus = require("./menu")
-const {showMenu, checkDbForOrder, selectOrder } = require("./orderLogic")
+const {showMenu, checkDbForOrder, selectOrder, getOrderHistory, cancelOrder } = require("./orderLogic")
 
 const PORT = process.env.PORT || 8080
 
@@ -20,9 +20,7 @@ io.on("connection", (socket)=>{
 
     console.log( "a user connected " + userId + " " + socket.id)
     console.log(socket.listenerCount)
-    // socket.on("greeting", (data)=>{
-    //     console.log(data)
-    // })
+ 
     socket.emit("greeting", "Welcome to Iya-Bashira Buka! My name na Padi, your assistant bot.")
 
     const options = [
@@ -64,8 +62,10 @@ io.on("connection", (socket)=>{
                         // socket.emit( "request" ,`you selected ${message} to checkout order`)
                         // redirect to checkout page
                         checkDbForOrder(socket,key).then((order)=>{
+                            console.log(order, typeof(order))
                             if(order){
-                                socket.emit("request", `you have an order with id ${order}`)
+                                // socket.emit("request", `you have an order with id ${order}`)
+                                socket.emit("request", `checkout`)
                             }else{
                                 socket.emit("request", "you have no order yet")
                             }
@@ -76,14 +76,33 @@ io.on("connection", (socket)=>{
 
                         break;
                     case '98':
-                        
-                        socket.emit("request",`you selected ${message} to see order history`)
-                        // fetch order history of this user
+                        getOrderHistory(key).then((allOrders)=>{
+                           const orderHistory = allOrders.map((orders)=> JSON.parse(orders))
+
+                           const clientHistory = []
+                           orderHistory.forEach((history)=>{ 
+                             history.forEach((hist)=>{
+                               clientHistory.push(hist)
+                             })
+                           })
+                           console.log(clientHistory)
+                           
+                           const clientHistoryList = clientHistory.map((list)=>list.name).reduce((cum, curr) => cum + ", " + curr )
+                           const clientHistoryprice = clientHistory.map((list)=>list.price).reduce((cum, curr) => cum + curr )
+                           const html = `<h3>Here is your Order History: </h3> <br>
+                                         <p><b>Meal ordered:</b><br> ${clientHistoryList} </p><br>
+                                         <b>Total amount spent: ${clientHistoryprice}<b>`
+
+                            socket.emit("request", html)
+                        }).catch((error)=>{
+                            console.error(error)
+                        })
                         break;
                     case '97':
                         checkDbForOrder(socket,key).then((order)=>{
                             if(order){
-                                socket.emit("request", order)
+                                console.log(order, typeof(order))
+                                socket.emit("request", JSON.parse(order))
                                 userState[socket.id] = "main-menu"
                             }else{
                                 socket.emit("request", "you have no order yet")
@@ -94,8 +113,11 @@ io.on("connection", (socket)=>{
                         })
                         break;
                     case '0':
-                        socket.emit("request",`you selected ${message} to cancel an order`)
-                        // cancel the current order, more like delete
+                        cancelOrder(socket, key).then((message)=>{
+                            socket.emit("request", message)
+                        }).catch((error)=>{
+                            socket.emit("request", `an error occurred while cancelling order ${error}`)
+                        })
                         break;
                     default:
                         socket.emit("request","unkown selection")
@@ -134,6 +156,13 @@ io.on("connection", (socket)=>{
                         }).catch((err)=>{
                             console.log(err)
                             socket.emit("request", "an error occurred while checking your order")
+                        })
+                        break;
+                        case '0':
+                        cancelOrder(socket, key).then((message)=>{
+                            socket.emit("request", message)
+                        }).catch((error)=>{
+
                         })
                         break;
                     default:

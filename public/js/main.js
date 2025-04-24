@@ -55,7 +55,7 @@ socket.on("menus", (options) => {
 })
 
 
-send_message.addEventListener("submit", (e) => {
+const handleSubmit = (e) => {
     e.preventDefault();
     const message = list.value
     socket.emit("selected", message)
@@ -75,7 +75,10 @@ send_message.addEventListener("submit", (e) => {
     user_container.appendChild(user_profile_image)
     message_box.appendChild(user_container)
     list.value = ""
-})
+}
+
+send_message.removeEventListener("submit", handleSubmit)
+send_message.addEventListener("submit", handleSubmit)
 
 socket.on("request", (message) => {
     const chat_section = document.querySelector(".chat-section")
@@ -90,19 +93,17 @@ socket.on("request", (message) => {
     bot_image.alt = "bot image";
     bot_image.src = "/images/bot.png";
     if (message) {
-        // console.log("this condition works: ", message)
         if (typeof (message) == "string") {
-            bot_message_el.appendChild(document.createTextNode(message))
+            bot_message_el.innerHTML = message
+            // bot_message_el.appendChild(document.createTextNode(message))
         } else if (Array.isArray(message)) {
-
-            console.log("its an array")
             const formattedMenu = message.map((msg) => {
-                return `${msg.number}.  ${msg.name} ------> #${msg.price} ....`
-            }).join("\n")
+                return `${msg.number}.  ${msg.name} ------> &#8358;${msg.price}`
+            }).join("<br>")
 
-            console.log(formattedMenu)
-            bot_message_el.appendChild(document.createTextNode(formattedMenu))
-        }
+            bot_message_el.innerHTML = formattedMenu
+            // bot_message_el.appendChild(document.createTextNode(formattedMenu))
+        }   
         bot_reponse_container.appendChild(bot_image)
         bot_reponse_container.appendChild(bot_message_el)
         message_box.appendChild(bot_reponse_container)
