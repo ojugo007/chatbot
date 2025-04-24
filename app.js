@@ -61,7 +61,7 @@ io.on("connection", (socket)=>{
                     case '99':
                         // socket.emit( "request" ,`you selected ${message} to checkout order`)
                         // redirect to checkout page
-                        checkDbForOrder(socket,key).then((order)=>{
+                        checkDbForOrder(key).then((order)=>{
                             console.log(order, typeof(order))
                             if(order){
                                 // socket.emit("request", `you have an order with id ${order}`)
@@ -99,7 +99,7 @@ io.on("connection", (socket)=>{
                         })
                         break;
                     case '97':
-                        checkDbForOrder(socket,key).then((order)=>{
+                        checkDbForOrder(key).then((order)=>{
                             if(order){
                                 console.log(order, typeof(order))
                                 socket.emit("request", JSON.parse(order))
@@ -109,7 +109,7 @@ io.on("connection", (socket)=>{
                             }
                         }).catch((err)=>{
                             console.log(err)
-                            socket.emit("request", "an error occurred while checking your order")
+                            socket.emit("request", `an error occurred while checking your order ${err.message}` )
                         })
                         break;
                     case '0':
@@ -144,7 +144,7 @@ io.on("connection", (socket)=>{
                         break;
 
                     case "99":
-                        checkDbForOrder(socket,key).then((order)=>{
+                        checkDbForOrder(key).then((order)=>{
                             if(order){
                                 // socket.emit("request", `you have an order with id ${order}`)
                                 socket.emit("request", `checkout`)
