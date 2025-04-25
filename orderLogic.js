@@ -69,12 +69,13 @@ const cancelOrder = async(key)=>{
     return "your current order has been cancelled";
 }
 
-const checkout = async(key) =>{
+const checkout = async(email,key) =>{
+
     const order = await cache.redis.get(key)
     const amount = JSON.parse(order).map((item)=>item.price).reduce((cum, curr)=> cum + curr)
 
     const data = {
-        "email" : "ojugos@gmail.com",
+        "email" : email,
         "amount" : amount * 100
     }
    const response = await axios.post("https://api.paystack.co/transaction/initialize", data, {

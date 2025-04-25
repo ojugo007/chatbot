@@ -18,6 +18,7 @@ app.use(express.static("public"))
 
 io.on("connection", (socket)=>{
     const userId = socket.handshake.auth.userId;
+    const userEmail = socket.handshake.auth.email
  
     socket.emit("greeting", "Welcome to Iya-Bashira Buka! My name na Padi, your assistant bot.")
 
@@ -58,7 +59,7 @@ io.on("connection", (socket)=>{
                         checkDbForOrder(key).then((order)=>{
                             console.log(order, typeof(order))
                             if(order){
-                                checkout(key).then((res)=>{
+                                checkout(userEmail, key).then((res)=>{
 
                                     socket.emit("request", res)
                                     
@@ -112,10 +113,10 @@ io.on("connection", (socket)=>{
                         })
                         break;
                     case '0':
-                        cancelOrder(socket, key).then((message)=>{
+                        cancelOrder(key).then((message)=>{
                             socket.emit("request", message)
                         }).catch((error)=>{
-                            socket.emit("request", `an error occurred while cancelling order ${error}`)
+                            socket.emit("request", `an error occurred while cancelling order ${error.message}`)
                         })
                         break;
                     default:
@@ -144,9 +145,8 @@ io.on("connection", (socket)=>{
 
                     case "99":
                         checkDbForOrder(key).then((order)=>{
-
                             if(order){
-                                checkout(key).then((res)=>{
+                                checkout(userEmail, key).then((res)=>{
 
                                     socket.emit("request", res)
 
@@ -165,13 +165,15 @@ io.on("connection", (socket)=>{
                             socket.emit("request", "an error occurred while checking your order")
                         })
                         break;
-                        case '0':
-                        cancelOrder(socket, key).then((message)=>{
-                            socket.emit("request", message)
-                        }).catch((error)=>{
-
-                        })
+                    case '0':
+                            cancelOrder(key).then((message)=>{
+                                socket.emit("request", message)
+                            }).catch((error)=>{
+                                socket.emit("request", `an error occurred while cancelling order ${error.message}`)
+                            })
+                            userState[socket.id] = "main-menu"
                         break;
+
                     default:
                         socket.emit("request", "❌ invalid food selection, try again")
                         break;
@@ -192,7 +194,9 @@ io.on("connection", (socket)=>{
 app.get("/", (req, res)=>{
     res.sendFile(join(__dirname , "index.html"))
 })
-
+app.get('/payment/callback', async (req, res) => {
+     res.sendFile(join(__dirname, "callback.html"));
+})
 server.listen(PORT, ()=>{
     console.log(`server is running on http://localhost:${PORT}`)
 })

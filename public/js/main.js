@@ -8,15 +8,16 @@ const send_message = document.querySelector("#send-message");
 const message_box = document.querySelector("#message-box");
 
 
-
+const userEmail = prompt("please enter your email: ")
 let userId = localStorage.getItem("userId")
+
 if (!userId) {
     userId = crypto.randomUUID();
     localStorage.setItem("userId", userId)
 }
 // const socket = io("http://localhost:8080", { auth: { userId } })
 const socket = io(`${location.origin}`, {
-    auth: { userId },
+    auth: { userId, email: userEmail},
     transports: ['websocket'],
 });
 

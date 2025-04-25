@@ -30,7 +30,7 @@ html {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 20px;
+    
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     border-radius: 8px;
 
@@ -39,14 +39,13 @@ html {
 .chat-section{
     overflow-y: scroll;
     padding: 20px;
-    flex: 80px;
+    flex: 80%;
     background-image: url(/images/whatsapp.png);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
     
 }
-
 
 .welcome-message-container,
 .selected-options {
@@ -81,7 +80,7 @@ html {
     border: 1px solid skyblue;
     border-radius: 5px;
     padding: 15px;
-    width: max-content;
+    width: 70%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     display: block;
     margin-bottom: 50px;
@@ -121,12 +120,13 @@ form {
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 20px;
 
     padding: 30px 50px;
 
     input{
-        flex: 1;
+        width: 85%;
         padding: 15px 30px;
         border: 1px solid skyblue;
         border-radius: 30px;
@@ -146,8 +146,8 @@ form {
     }
 
     button {
-        width: 50px;
-        height: 50px;
+        width: 35px;
+        height: 35px;
         padding: 10px;
         border-radius: 50%;
         background: white;
@@ -155,6 +155,9 @@ form {
         display: grid;
         place-content: center;
         border: none;
+        img{
+            width: 16px;
+        }
 
     }
 }
@@ -186,4 +189,24 @@ form {
     display: block;
     margin-top: 25px;
     text-align: center;
+}
+
+@media only screen and (max-width: 628px){
+    .chat-box{
+        width: 100%;
+        height: 100vh;
+    }
+    .container {
+        padding: 0;
+    }
+}
+@media only screen and (max-width: 350px){
+    form {
+        gap: 8px;
+        padding: 30px 15px;
+    }
+    .option-container {
+        width: 100%;
+    
+    }
 }
